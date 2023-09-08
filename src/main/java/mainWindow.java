@@ -12,6 +12,7 @@ public class mainWindow extends JDialog {
     private JTextField url;
     private JTextField msg;
     private JTextField statusTextField;
+    private JTextField keyTextField;
     private JLabel estado;
     private ConnectionFactory factory;
     private final static String QUEUE_NAME = "prueba";
@@ -54,15 +55,20 @@ public class mainWindow extends JDialog {
     private void onSend() {
         try {
             factory.setUri(url.getText());
+            // Create a new connection to the server.
             Connection connection = factory.newConnection();
+            // Create a channel.
             Channel channel = connection.createChannel();
-            channel.queueDeclare(QUEUE_NAME, false, false, false, null);
+            String key = keyTextField.getText();
+            // Creates a queue -- it will only be created if it doesn't exist already.
+            channel.queueDeclare(key, false, false, false, null);
             String message = msg.getText();
-            channel.basicPublish("", QUEUE_NAME, null, message.getBytes("UTF-8"));
+            channel.basicPublish("", key, null, message.getBytes("UTF-8"));
             msg.setText("");
             statusTextField.setText("Mensaje enviado.");
         } catch (Exception e) {
             statusTextField.setText(e.toString());
+            System.out.println(e);
         }
     }
 
